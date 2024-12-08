@@ -1,15 +1,22 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "target": "es5",
     "module": "commonjs",
-    "@components/*": ["./components/*"],
     "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["./components/*"]
+    },
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true
-  }
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
+  "scripts": {
+  "start": "react-scripts start" 
+}
+
 }
