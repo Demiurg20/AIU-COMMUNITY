@@ -2,13 +2,14 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
     "target": "es5",
     "module": "commonjs",
-    "jsx": "react",
-    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "baseUrl": "./src",
     "paths": {
       "@/*": ["src/*"],
-      "@components/*": ["./components/*"]
+      "@components/*": ["components/*"]
     },
     "strict": true,
     "esModuleInterop": true
