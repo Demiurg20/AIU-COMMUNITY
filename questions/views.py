@@ -1,11 +1,11 @@
-
-
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 # Create your views here.
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.views import APIView
-from .models import Question, Answer, Faculty
-from .serializers import QuestionSerializer, AnswerSerializer, FacultySerializer
+from .models import Question, Answer, Faculty, UserProfile
+from .serializers import QuestionSerializer, AnswerSerializer, FacultySerializer, UserProfileSerializer
 #APIView, #ListAPIView, CreateAPIView, DeleteAPIView
 
 class QuestionList(generics.ListCreateAPIView):
@@ -62,4 +62,33 @@ class AnswerList(APIView):
             serializer.save(question_id=question)  # Save the answer linked to the question
             return Response(serializer.data, status=status.HTTP_201_CREATED)  # Return the created answer data
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Return validation errors if any
-    
+class UserProfileDetail(APIView):
+    parser_classes = [MultiPartParser, FormParser]  # To handle file uploads
+
+    def get(self, request, pk):
+        try:
+            profile = UserProfile.objects.get(pk=pk)
+            serializer = UserProfileSerializer(profile)
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    def patch(self, request, pk):
+        try:
+            profile = UserProfile.objects.get(pk=pk)
+            serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except UserProfile.DoesNotExist:
+            return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class UserProfileCreate(generics.CreateAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+
+class UserProfileDetail(generics.RetrieveAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    lookup_field = 'pk'  # Use 'pk' to look up the user by their primary key

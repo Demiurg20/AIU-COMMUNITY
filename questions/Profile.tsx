@@ -1,101 +1,100 @@
-'use client'
 import React, { useState, useEffect } from 'react';
-import { Component } from '@angular/core';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useState, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Faculty {
-  id: number
-  name: string
-  college_uni: string
+  id: number;
+  name: string;
+  college_uni: string;
 }
 
 interface UserProfile {
-  id: number
-  name: string
-  email: string
-  bio: string | null
-  faculty: Faculty | null
-  profile_picture: string | null
-  resume: string | null
-  github_link: string | null
-  linkedin_link: string | null
-  created_at: string
+  id: number;
+  name: string;
+  email: string;
+  bio: string | null;
+  faculty: Faculty | null;
+  profile_picture: string | null;
+  resume: string | null;
+  github_link: string | null;
+  linkedin_link: string | null;
 }
 
-export default function UserProfile() {
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [faculties, setFaculties] = useState<Faculty[]>([])
-  const [isEditing, setIsEditing] = useState(false)
+const Profile = () => {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Fetch user profile and faculty data
   useEffect(() => {
-    // Fetch user profile and faculties data
-    // This is a placeholder. Replace with actual API calls.
     const fetchData = async () => {
-      // const profileResponse = await fetch('/api/profile')
-      // const profileData = await profileResponse.json()
-      // setProfile(profileData)
+      try {
+        const profileResponse = await fetch('/api/v1/userprofiles/1'); // Replace with the actual user ID
+        const profileData = await profileResponse.json();
+        setProfile(profileData);
 
-      // const facultiesResponse = await fetch('/api/faculties')
-      // const facultiesData = await facultiesResponse.json()
-      // setFaculties(facultiesData)
+        const facultiesResponse = await fetch('/api/v1/faculties');
+        const facultiesData = await facultiesResponse.json();
+        setFaculties(facultiesData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-      // Placeholder data
-      setProfile({
-        id: 1,
-        name: "John Doe",
-        email: "john@example.com",
-        bio: "A passionate developer",
-        faculty: { id: 1, name: "Computer Science", college_uni: "Tech University" },
-        profile_picture: null,
-        resume: null,
-        github_link: "https://github.com/johndoe",
-        linkedin_link: "https://linkedin.com/in/johndoe",
-        created_at: "2023-01-01T00:00:00Z"
-      })
-      setFaculties([
-        { id: 1, name: "Computer Science", college_uni: "Tech University" },
-        { id: 2, name: "Electrical Engineering", college_uni: "Tech University" },
-      ])
-    }
-
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (profile) {
-      setProfile({ ...profile, [e.target.name]: e.target.value })
+      setProfile({ ...profile, [e.target.name]: e.target.value });
     }
-  }
+  };
 
   const handleFacultyChange = (value: string) => {
     if (profile) {
-      const selectedFaculty = faculties.find(f => f.id.toString() === value)
-      setProfile({ ...profile, faculty: selectedFaculty || null })
+      const selectedFaculty = faculties.find(faculty => faculty.id.toString() === value);
+      setProfile({ ...profile, faculty: selectedFaculty || null });
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // Submit updated profile to the backend
-    // This is a placeholder. Replace with actual API call.
-    console.log("Updated profile:", profile)
-    setIsEditing(false)
+    e.preventDefault();
+    // Send updated profile to the backend
+    try {
+      const response = await fetch(`/api/v1/userprofiles/1/`, { // Replace with dynamic user ID if needed
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profile),
+      });
+      const updatedProfile = await response.json();
+      setProfile(updatedProfile);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error submitting the profile:', error);
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   if (!profile) {
-    return <div>Loading...</div>
+    return <div>No profile found</div>;
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto mt-5">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">User Profile</CardTitle>
       </CardHeader>
@@ -106,9 +105,7 @@ export default function UserProfile() {
               <AvatarImage src={profile.profile_picture || undefined} alt={profile.name} />
               <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            {isEditing && (
-              <Input type="file" accept="image/*" name="profile_picture" />
-            )}
+            {isEditing && <Input type="file" accept="image/*" name="profile_picture" />}
           </div>
 
           <div className="space-y-2">
@@ -148,15 +145,12 @@ export default function UserProfile() {
           <div className="space-y-2">
             <Label htmlFor="faculty">Faculty</Label>
             {isEditing ? (
-              <Select
-                value={profile.faculty?.id.toString()}
-                onValueChange={handleFacultyChange}
-              >
+              <Select value={profile.faculty?.id.toString() || ''} onValueChange={handleFacultyChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a faculty" />
                 </SelectTrigger>
                 <SelectContent>
-                  {faculties.map((faculty) => (
+                  {faculties.map(faculty => (
                     <SelectItem key={faculty.id} value={faculty.id.toString()}>
                       {faculty.name} - {faculty.college_uni}
                     </SelectItem>
@@ -215,5 +209,7 @@ export default function UserProfile() {
         </form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
+
+export default Profile;

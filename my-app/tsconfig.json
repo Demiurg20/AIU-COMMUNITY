@@ -17,6 +17,5 @@
   "exclude": ["node_modules"],
   "scripts": {
   "start": "react-scripts start" 
-}
-
+  }
 }
